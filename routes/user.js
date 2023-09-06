@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/user');
+const bcrypt = require('bcrypt');
 
 router.post('/create', async(req, res)=>{
     try {
@@ -49,6 +50,25 @@ router.delete('/deleteUser/:id', async(req, res) =>{
     } catch (error) {
         res.status(400).send(error)  
     }
+})
+router.post('/register', async(req, res)=>{
+    data = req.body;
+    usr = new User(data);
+    salt = bcrypt.genSaltSync(10);
+    cryptedPass = await bcrypt.hashSync(data.password, salt);
+    usr.password =  cryptedPass;
+    usr.save()
+        .then(
+            (saved)=>{
+                res.status(200).send(saved);
+            }
+        )
+        .catch(
+            (err) =>{
+                res.status(400).send(err);
+            }
+        )
+
 })
 
 module.exports = router;
